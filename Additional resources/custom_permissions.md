@@ -71,6 +71,37 @@ class IsVerifiedUser(BasePermission):
 
 ---
 
+### ✅ Example 4: Only Read Access for Non-Admins
+
+```python
+class ReadOnlyOrAdmin(BasePermission):
+    def has_permission(self, request, view):
+        # SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
+        if request.method in ('GET', 'HEAD', 'OPTIONS'):
+            return True
+        return request.user and request.user.is_staff
+```
+
+This allows anyone to view (`GET`), but only admins can modify data (`POST`, `PUT`, `DELETE`).
+
+---
+
+### ✅ Example 5: Only Members of a Specific Group Can Access
+
+```python
+class IsInEditorsGroup(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user 
+            and request.user.is_authenticated 
+            and request.user.groups.filter(name='Editors').exists()
+        )
+```
+
+Use this when only users from a particular group (e.g., `"Editors"`) should be allowed to perform actions on the endpoint.
+
+---
+
 ## 🔁 Method Reference
 
 | Method                    | When It's Called                          |
