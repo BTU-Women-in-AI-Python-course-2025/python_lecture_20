@@ -95,6 +95,73 @@ class ReadOnlyOrWriteView(APIView):
 
 ---
 
+### 4. `IsAdminUser`
+
+Only users with **admin privileges** (`is_staff=True`) can access the view:
+
+```python
+from rest_framework.permissions import IsAdminUser
+
+class AdminOnlyView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        return Response({"message": "Welcome, admin user!"})
+```
+
+This is useful for admin dashboards or management endpoints that should not be visible to normal users.
+
+---
+
+### 5. `DjangoModelPermissions`
+
+Enforces **Django’s built-in model-level permissions** (`add`, `change`, `delete`, `view`).
+
+Users must have specific permissions assigned via Django’s admin or group settings.
+
+```python
+from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.viewsets import ModelViewSet
+from myapp.models import Product
+from myapp.serializers import ProductSerializer
+
+class ProductViewSet(ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [DjangoModelPermissions]
+```
+
+🔹 Example rules enforced:
+
+* User must have `myapp.view_product` to list or retrieve.
+* User must have `myapp.add_product` to create.
+* User must have `myapp.change_product` to update.
+* User must have `myapp.delete_product` to delete.
+
+---
+
+### 6. `DjangoObjectPermissions`
+
+Adds **object-level permissions** (per individual record), using Django’s object permission system (like from `django-guardian`).
+
+```python
+from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework.viewsets import ModelViewSet
+from myapp.models import Document
+from myapp.serializers import DocumentSerializer
+
+class DocumentViewSet(ModelViewSet):
+    queryset = Document.objects.all()
+    serializer_class = DocumentSerializer
+    permission_classes = [DjangoObjectPermissions]
+```
+
+🔹 This checks **permissions on each object** (e.g., `view_document`, `change_document` on specific instances).
+
+🔸 To use this, you’ll need a backend that supports object-level permissions — such as the `django-guardian` package.
+
+---
+
 ## 📘 Summary
 
 | Permission Class            | Best For                   |
