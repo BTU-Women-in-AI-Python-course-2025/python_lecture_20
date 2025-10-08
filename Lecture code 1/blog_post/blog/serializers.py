@@ -65,3 +65,9 @@ class BlogPostCreateUpdateSerializer(serializers.ModelSerializer):
             else:
                 BannerImage.objects.create(blog_post=instance, image=banner_image)
         return instance
+
+class BlogPostNotPublishedListSerializer(BlogPostListSerializer):
+
+    class Meta:
+        model = BlogPost
+        fields = ['id', 'title', 'category']

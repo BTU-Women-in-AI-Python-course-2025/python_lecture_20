@@ -1,15 +1,18 @@
 from rest_framework import mixins, viewsets, status, permissions
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 
 from blog.filter_set import BlogPostFilter
 from blog.models import BlogPost, Author
 from blog.pagination import BlogPostPagination, BlogPostLimitOffsetPagination, BlogPostCursorPagination
-from blog.permissions import IsOwner, ReadOnlyOrAdminOrOwner
+from blog.permissions import ReadOnlyOrAdminOrOwner
 from blog.serializers import (
     BlogPostListSerializer,
     BlogPostDetailSerializer,
-    BlogPostCreateUpdateSerializer, AuthorSerializer
+    BlogPostCreateUpdateSerializer,
+    AuthorSerializer,
+    BlogPostNotPublishedListSerializer
 )
 
 
@@ -65,6 +68,8 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             return BlogPostCreateUpdateSerializer
         elif self.action == 'retrieve':
             return BlogPostDetailSerializer
+        elif self.action == 'not_published':
+            return BlogPostNotPublishedListSerializer
         return BlogPostListSerializer
 
     def list(self, request, *args, **kwargs):
@@ -81,6 +86,31 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         instance.deleted = True
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'])  # for detail route
+    def publish(self, request, pk=None):
+        obj = self.get_object()
+        obj.published = True
+        obj.save(update_fields=['published'])
+        return Response({'status': 'published'}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'])  # for collection route
+    def archive(self, request, pk=None):
+        obj = self.get_object()
+        obj.archived = True
+        obj.save(update_fields=['archived'])
+        return Response({'status': 'archived'}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get', 'post', 'put', 'patch'])
+    def not_published(self, request):
+        blog_posts = BlogPost.objects.filter(published=False)
+        serializer = self.get_serializer(blog_posts, many=True)
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        # code here
+        return self.update(request, *args, **kwargs)
 
 
 class AuthorViewSet(viewsets.ModelViewSet):

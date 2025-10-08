@@ -51,6 +51,9 @@ class BlogPost(models.Model):
     category = models.IntegerField(choices=BLOG_POST_CATEGORY_CHOICES, verbose_name='Category', null=True)
     order = models.IntegerField(verbose_name='Order', null=True, blank=True, default=0)
 
+    published = models.BooleanField(verbose_name='Published', default=False)
+    archived = models.BooleanField(verbose_name='Archived', default=False)
+
     def get_images(self):
         return BlogPostImage.objects.filter(blog_post=self.id)
 
