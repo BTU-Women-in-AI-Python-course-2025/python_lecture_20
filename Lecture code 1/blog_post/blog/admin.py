@@ -17,7 +17,7 @@ class BlogPostAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'text', 'authors', 'category', 'website', 'document')
+            'fields': ('title', 'owner', 'text', 'authors', 'category', 'website', 'document')
         }),
         ('Status', {
             'fields': ('active', 'deleted')

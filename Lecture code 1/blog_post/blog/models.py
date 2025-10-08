@@ -29,6 +29,12 @@ class Author(models.Model):
 
 
 class BlogPost(models.Model):
+    owner = models.ForeignKey(
+        verbose_name='Owner',
+        to='user.CustomUser',
+        on_delete=models.CASCADE,
+        null=True
+    )
     authors = models.ManyToManyField(
         to='blog.Author', verbose_name='ავტორები', related_name='blog_posts')
 

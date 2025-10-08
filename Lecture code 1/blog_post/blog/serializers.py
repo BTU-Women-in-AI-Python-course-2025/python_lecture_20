@@ -49,6 +49,7 @@ class BlogPostCreateUpdateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         banner_image = validated_data.pop('banner_image', None)
+        validated_data['owner'] = self.context['request'].user
         blog_post = BlogPost.objects.create(**validated_data)
         if banner_image:
             BannerImage.objects.create(blog_post=blog_post, image=banner_image)

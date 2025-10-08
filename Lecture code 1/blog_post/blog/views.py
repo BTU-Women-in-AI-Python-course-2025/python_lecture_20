@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from blog.filter_set import BlogPostFilter
 from blog.models import BlogPost, Author
 from blog.pagination import BlogPostPagination, BlogPostLimitOffsetPagination, BlogPostCursorPagination
+from blog.permissions import IsOwner, ReadOnlyOrAdminOrOwner
 from blog.serializers import (
     BlogPostListSerializer,
     BlogPostDetailSerializer,
@@ -56,7 +57,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         if self.action == 'list' or self.action == 'retrieve':
             self.permission_classes = [AllowAny]
         else:
-            self.permission_classes = [IsAuthenticated]
+            self.permission_classes = [IsAuthenticated, ReadOnlyOrAdminOrOwner]
         return [permission() for permission in self.permission_classes]
 
     def get_serializer_class(self):
