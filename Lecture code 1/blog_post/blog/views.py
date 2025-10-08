@@ -1,11 +1,11 @@
-from rest_framework import mixins, viewsets, status, permissions
+from rest_framework import mixins, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 
 from blog.filter_set import BlogPostFilter
 from blog.models import BlogPost, Author
-from blog.pagination import BlogPostPagination, BlogPostLimitOffsetPagination, BlogPostCursorPagination
+from blog.pagination import BlogPostPagination, BlogPostCursorPagination
 from blog.permissions import ReadOnlyOrAdminOrOwner
 from blog.serializers import (
     BlogPostListSerializer,
@@ -20,8 +20,14 @@ class BlogPostListViewSet(mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     queryset = BlogPost.objects.filter(deleted=False)
     serializer_class = BlogPostListSerializer
-    # pagination_class = BlogPostLimitOffsetPagination
     pagination_class = BlogPostCursorPagination
+
+    @action(detail=True, methods=['post', 'put', 'patch'])
+    def archive(self, request, pk=None):
+        obj = self.get_object()
+        obj.archived = True
+        obj.save(update_fields=['archived'])
+        return Response({'status': 'archived'}, status=status.HTTP_200_OK)
 
 
 class BlogPostCreateViewSet(mixins.CreateModelMixin,
@@ -94,14 +100,14 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         obj.save(update_fields=['published'])
         return Response({'status': 'published'}, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['post'])  # for collection route
+    @action(detail=True, methods=['post', 'put', 'patch'])  # for collection route
     def archive(self, request, pk=None):
         obj = self.get_object()
         obj.archived = True
         obj.save(update_fields=['archived'])
         return Response({'status': 'archived'}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['get', 'post', 'put', 'patch'])
+    @action(detail=False, methods=['get', 'post'])
     def not_published(self, request):
         blog_posts = BlogPost.objects.filter(published=False)
         serializer = self.get_serializer(blog_posts, many=True)
