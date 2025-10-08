@@ -1,4 +1,5 @@
-from rest_framework import mixins, viewsets, status
+from rest_framework import mixins, viewsets, status, permissions
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 
 from blog.filter_set import BlogPostFilter
@@ -23,6 +24,7 @@ class BlogPostCreateViewSet(mixins.CreateModelMixin,
                            viewsets.GenericViewSet):
     queryset = BlogPost.objects.all()
     serializer_class = BlogPostCreateUpdateSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
 
 class BlogPostDetailViewSet(mixins.RetrieveModelMixin,
@@ -35,18 +37,27 @@ class BlogPostUpdateViewSet(mixins.UpdateModelMixin,
                            viewsets.GenericViewSet):
     queryset = BlogPost.objects.filter(deleted=False)
     serializer_class = BlogPostCreateUpdateSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class BlogPostDeleteViewSet(mixins.DestroyModelMixin,
                            viewsets.GenericViewSet):
     queryset = BlogPost.objects.filter(deleted=False)
     serializer_class = BlogPostListSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class BlogPostViewSet(viewsets.ModelViewSet):
     queryset = BlogPost.objects.filter(deleted=False)
     pagination_class = BlogPostPagination
     filterset_class = BlogPostFilter
+
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return [permission() for permission in self.permission_classes]
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update':
