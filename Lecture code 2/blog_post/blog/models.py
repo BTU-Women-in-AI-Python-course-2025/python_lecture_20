@@ -71,6 +71,9 @@ class BlogPost(models.Model):
     deleted = models.BooleanField(verbose_name="Deleted", default=False)
     order = models.IntegerField(verbose_name="Order", default=0)
 
+    published = models.BooleanField(verbose_name="Published", default=False)
+    archived = models.BooleanField(verbose_name="Archived", default=False)
+
     def get_images(self):
         return self.images.all()
 

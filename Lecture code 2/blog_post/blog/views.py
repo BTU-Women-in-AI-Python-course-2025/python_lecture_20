@@ -1,4 +1,5 @@
 from rest_framework import mixins, viewsets, status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -89,6 +90,25 @@ class BlogPostViewSet(ModelViewSet):
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=True, methods=['post'])  # for detail route
+    def publish(self, request, pk=None):
+        obj = self.get_object()
+        obj.published = True
+        obj.save(update_fields=['published'])
+        return Response({'status': 'published'}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'])  # for detail route
+    def archive(self, request, pk=None):
+        obj = self.get_object()
+        obj.archived = True
+        obj.save(update_fields=['archived'])
+        return Response({'status': 'archived'}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'])
+    def archived_posts(self, request):
+        archived_posts = BlogPost.objects.filter(archived=True)
+        serializer = self.get_serializer(archived_posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()

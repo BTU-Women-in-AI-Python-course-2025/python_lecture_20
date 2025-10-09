@@ -9,7 +9,7 @@ admin.site.register(BlogPostCover)
 
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'is_active', 'deleted', 'category', 'order')
+    list_display = ('title', 'is_active', 'deleted', 'category', 'published', 'archived')
     list_editable = ('is_active', 'deleted')
     list_filter = ('is_active', 'category', 'deleted', 'created_at')
     search_fields = ('title', 'text')
@@ -29,6 +29,6 @@ class BlogPostAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at')
         }),
         ('Status', {
-            'fields': ('deleted',)
+            'fields': ('deleted', 'published', 'archived')
         }),
     )
