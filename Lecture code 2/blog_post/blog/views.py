@@ -1,5 +1,5 @@
 from rest_framework import mixins, viewsets, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -50,7 +50,14 @@ class  BlogPostDeleteViewSet(mixins.DestroyModelMixin,
 class BlogPostViewSet(ModelViewSet):
     queryset = BlogPost.objects.filter(deleted=False)
     filterset_class = BlogPostFilter
-    permission_classes = [IsAuthenticated, ReadOnlyOrIsOwnerOrAdmin]
+    # permission_classes = [IsAuthenticated, ReadOnlyOrIsOwnerOrAdmin]
+
+    def get_permissions(self):
+        if self.action == 'retrieve' or self.action == 'list':
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated, ReadOnlyOrIsOwnerOrAdmin]
+        return [permission() for permission in self.permission_classes]
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
