@@ -1,10 +1,12 @@
 from rest_framework import mixins, viewsets, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from blog.filtersets import BlogPostFilter
 from blog.models import BlogPost, Author
 from blog.pagination import BlogPostPagination
+from blog.permissions import ReadOnlyOrAdmin, ReadOnlyOrIsOwnerOrAdmin
 from blog.serializers import (
     BlogPostListSerializer,
     BlogPostDetailSerializer,
@@ -18,6 +20,7 @@ class BlogPostListViewSet(mixins.ListModelMixin,
     serializer_class = BlogPostListSerializer
     pagination_class = BlogPostPagination
     filterset_class = BlogPostFilter
+    permission_classes = [ReadOnlyOrAdmin]
 
 
 class BlogPostDetailViewSet(mixins.RetrieveModelMixin,
@@ -47,6 +50,7 @@ class  BlogPostDeleteViewSet(mixins.DestroyModelMixin,
 class BlogPostViewSet(ModelViewSet):
     queryset = BlogPost.objects.filter(deleted=False)
     filterset_class = BlogPostFilter
+    permission_classes = [IsAuthenticated, ReadOnlyOrIsOwnerOrAdmin]
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

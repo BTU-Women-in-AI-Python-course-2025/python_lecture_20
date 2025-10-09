@@ -40,6 +40,12 @@ class BlogPostAuthorThroughTable(models.Model):
 
 
 class BlogPost(models.Model):
+    owner = models.ForeignKey(
+        to='user.CustomUser',
+        on_delete=models.CASCADE,
+        verbose_name='Owner',
+        null=True
+    )
     authors = models.ManyToManyField(
         to="Author",
         related_name='blog_posts',
