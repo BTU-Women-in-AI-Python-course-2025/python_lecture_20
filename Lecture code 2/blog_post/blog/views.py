@@ -4,11 +4,12 @@ from rest_framework.viewsets import ModelViewSet
 
 from blog.filtersets import BlogPostFilter
 from blog.models import BlogPost, Author
-from blog.pagination import BlogPostPagination, BlogPostOffsetPagination, BlogPostCursorPagination
+from blog.pagination import BlogPostPagination
 from blog.serializers import (
     BlogPostListSerializer,
     BlogPostDetailSerializer,
-    BlogPostCreateUpdateSerializer, AuthorSerializer
+    BlogPostCreateUpdateSerializer,
+    AuthorSerializer
 )
 
 class BlogPostListViewSet(mixins.ListModelMixin,
@@ -16,7 +17,6 @@ class BlogPostListViewSet(mixins.ListModelMixin,
     queryset = BlogPost.objects.filter(deleted=False)
     serializer_class = BlogPostListSerializer
     pagination_class = BlogPostPagination
-    # filterset_fields = ['category', 'title']
     filterset_class = BlogPostFilter
 
 
@@ -46,8 +46,6 @@ class  BlogPostDeleteViewSet(mixins.DestroyModelMixin,
 
 class BlogPostViewSet(ModelViewSet):
     queryset = BlogPost.objects.filter(deleted=False)
-    # pagination_class = BlogPostOffsetPagination
-    # pagination_class = BlogPostCursorPagination
     filterset_class = BlogPostFilter
 
     def get_serializer_class(self):
