@@ -54,7 +54,7 @@ class BlogPostViewSet(ModelViewSet):
     # permission_classes = [IsAuthenticated, ReadOnlyOrIsOwnerOrAdmin]
 
     def get_permissions(self):
-        if self.action == 'retrieve' or self.action == 'list':
+        if self.action == 'retrieve' or self.action == 'list' or self.action == 'archived_posts':
             self.permission_classes = [AllowAny]
         else:
             self.permission_classes = [IsAuthenticated, ReadOnlyOrIsOwnerOrAdmin]
@@ -65,6 +65,8 @@ class BlogPostViewSet(ModelViewSet):
             return BlogPostDetailSerializer
         elif self.action == 'create' or self.action == 'update':
             return BlogPostCreateUpdateSerializer
+        elif self.action == 'publish':
+            return  BlogPostListSerializer
         else:
             return BlogPostListSerializer
 
@@ -109,6 +111,11 @@ class BlogPostViewSet(ModelViewSet):
         archived_posts = BlogPost.objects.filter(archived=True)
         serializer = self.get_serializer(archived_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        # code
+        return self.update(request, *args, **kwargs)
 
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
